@@ -4,6 +4,7 @@ import { Form, useActionData } from '@remix-run/react';
 import cinemaImg from '../../public/images/cinema.jpg';
 
 import { badRequest } from '~/utils/request.server';
+import { login } from '~/utils/session.server';
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: styles }];
 
@@ -20,7 +21,7 @@ function validatePassword(password: unknown) {
 }
 
 function validateUrl(url: string) {
-  let urls = ['/', 'https://remix.run'];
+  let urls = ['/'];
   if (urls.includes(url)) {
     return url;
   }
@@ -31,7 +32,7 @@ export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
   const username = form.get('username');
   const password = form.get('password');
-  const redirectTo = validateUrl(form.get('redirectTo') || '/');
+  const redirectTo = validateUrl('/');
   if (
     typeof username !== 'string' ||
     typeof password !== 'string' ||
@@ -54,6 +55,16 @@ export const action = async ({ request }: ActionArgs) => {
       fieldErrors,
       fields,
       formError: null,
+    });
+  }
+
+  const user = await login({ username, password });
+  console.log({ user });
+  if (!user) {
+    return badRequest({
+      fieldErrors: null,
+      fields,
+      formError: 'Username/Password combination is incorrect',
     });
   }
 
@@ -104,7 +115,7 @@ export default function Login() {
             <div className="form-field">
               <label htmlFor="password-input">Password</label>
               <input
-                type="text"
+                type="password"
                 id="password-input"
                 name="password"
                 placeholder="Enter your password"
