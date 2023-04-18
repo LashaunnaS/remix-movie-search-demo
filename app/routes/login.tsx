@@ -4,7 +4,7 @@ import { Form, useActionData } from '@remix-run/react';
 import cinemaImg from '../../public/images/cinema.jpg';
 
 import { badRequest } from '~/utils/request.server';
-import { login } from '~/utils/session.server';
+import { createUserSession, login } from '~/utils/session.server';
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: styles }];
 
@@ -68,14 +68,7 @@ export const action = async ({ request }: ActionArgs) => {
     });
   }
 
-  // login to get the user
-  // if there's no user, return the fields and a formError
-  // if there is a user, create their session and redirect to /jokes
-  return badRequest({
-    fieldErrors: null,
-    fields,
-    formError: `Form not submitted correctly.`,
-  });
+  return createUserSession(user.id, redirectTo);
 };
 
 export default function Login() {
